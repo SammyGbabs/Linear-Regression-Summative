@@ -16,20 +16,29 @@ app = FastAPI()
 # Define the data model for the input
 class PredictRequest(BaseModel):
     population: float
-    coastline: int
+    coastline: str  # Changed from int to str
     latitude: float
+
+# Mapping of coastline values
+COASTLINE_ENCODING = {
+    "yes": 1,
+    "no": 0
+}
 
 # Define the prediction endpoint
 @app.post("/predict/")
 def predict(data: PredictRequest):
     try:
-        # Map categorical value to numerical
-        coastline_encoded = 1 if data.coastline.lower() == 'yes' else 0
+        # Convert the coastline value to integer
+        if data.coastline not in COASTLINE_ENCODING:
+            raise HTTPException(status_code=400, detail="Invalid value for coastline")
+        
+        coastline_value = COASTLINE_ENCODING[data.coastline]
         
         # Convert the input data to a numpy array
         input_data = np.array([[
             data.population,
-            data.coastline,
+            coastline_value,
             data.latitude
         ]])
         
@@ -46,4 +55,4 @@ def predict(data: PredictRequest):
         
 if __name__ == "__main__":
         import uvicorn
-        uvicorn.run(app, host="127.0.0.1", port=8000)
+        uvicorn.run(app, host="0.0.0.0", port=8000)
