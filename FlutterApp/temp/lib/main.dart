@@ -30,14 +30,16 @@ class _PredictionPageState extends State<PredictionPage> {
   final TextEditingController _input2Controller = TextEditingController();
   final TextEditingController _input3Controller = TextEditingController();
   String _result = '';
-  String _coastlineValue = ''; // No default value
+  String _coastlineValue = ''; // No default value for coastline
 
   // Function to encode the coastline value
   int _encodeCoastline(String value) {
     if (value == 'yes') {
       return 1;
+    } else if (value == 'no') {
+      return 0;
     } else {
-      return 0; // Default value for 'no'
+      return -1; // Handle invalid value case
     }
   }
 
@@ -48,13 +50,13 @@ class _PredictionPageState extends State<PredictionPage> {
       final String input3 = _input3Controller.text;
 
       final double value1 = double.parse(input1);
-      final int value2 = _encodeCoastline(_coastlineValue);
+      final String value2 = _coastlineValue;
       final double value3 = double.parse(input3);
 
       final String apiUrl = 'https://linear-regression-summative.onrender.com/predict/'; // Adjust URL as needed
       final Map<String, dynamic> requestData = {
         'population': value1,
-        'coastline': value2,
+        'coastline': value2, // Send as string
         'latitude': value3,
       };
 
@@ -64,6 +66,10 @@ class _PredictionPageState extends State<PredictionPage> {
           headers: {'Content-Type': 'application/json'},
           body: json.encode(requestData),
         );
+
+        print('Response status: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        print('Request data: ${json.encode(requestData)}');
 
         if (response.statusCode == 200) {
           final Map<String, dynamic> responseData = json.decode(response.body);
@@ -79,6 +85,7 @@ class _PredictionPageState extends State<PredictionPage> {
         setState(() {
           _result = 'Failed to get prediction.';
         });
+        print('Error: $e');
       }
     }
   }
@@ -106,7 +113,7 @@ class _PredictionPageState extends State<PredictionPage> {
                 TextFormField(
                   controller: _input1Controller,
                   decoration: InputDecoration(
-                    labelText: 'Input Value 1',
+                    labelText: 'Population',
                     prefixIcon: Icon(Icons.input),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -145,16 +152,15 @@ class _PredictionPageState extends State<PredictionPage> {
                   }).toList(),
                   onChanged: (value) {
                     setState(() {
-                      _coastlineValue = value ?? '';
+                      _coastlineValue = value!;
                     });
                   },
-                  hint: Text('Select coastline'), // Placeholder text when no option is selected
                 ),
                 SizedBox(height: 20),
                 TextFormField(
                   controller: _input3Controller,
                   decoration: InputDecoration(
-                    labelText: 'Input Value 3',
+                    labelText: 'Latitude',
                     prefixIcon: Icon(Icons.input),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
