@@ -23,6 +23,9 @@ class PredictRequest(BaseModel):
 @app.post("/predict/")
 def predict(data: PredictRequest):
     try:
+        # Map categorical value to numerical
+        coastline_encoded = 1 if data.coastline.lower() == 'yes' else 0
+        
         # Convert the input data to a numpy array
         input_data = np.array([[
             data.population,
