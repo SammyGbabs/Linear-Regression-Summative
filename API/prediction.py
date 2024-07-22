@@ -4,8 +4,11 @@ from pydantic import BaseModel
 import numpy as np
 
 # Load the trained model and scaler from disk
-with open('temperature.pkl', 'rb') as f:
-    temperature = pickle.load(file)
+with open('temperature_scaler.pkl', 'rb') as file:
+    scaler = pickle.load(file)
+
+with open('temperature_model.pkl', 'rb') as file:
+    model = pickle.load(file)
 
 # Define the FastAPI app
 app = FastAPI()
