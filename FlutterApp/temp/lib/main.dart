@@ -26,26 +26,36 @@ class PredictionPage extends StatefulWidget {
 
 class _PredictionPageState extends State<PredictionPage> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _populationController = TextEditingController();
-  final TextEditingController _coastlineController = TextEditingController();
-  final TextEditingController _latitudeController = TextEditingController();
+  final TextEditingController _input1Controller = TextEditingController();
+  final TextEditingController _input2Controller = TextEditingController();
+  final TextEditingController _input3Controller = TextEditingController();
   String _result = '';
+  String _coastlineValue = ''; // No default value
+
+  // Function to encode the coastline value
+  int _encodeCoastline(String value) {
+    if (value == 'yes') {
+      return 1;
+    } else {
+      return 0; // Default value for 'no'
+    }
+  }
 
   Future<void> _predict() async {
     if (_formKey.currentState!.validate()) {
-      final String population = _populationController.text;
-      final String coastline = _coastlineController.text;
-      final String latitude = _latitudeController.text;
+      final String input1 = _input1Controller.text;
+      final String input2 = _input2Controller.text;
+      final String input3 = _input3Controller.text;
 
-      final double populationValue = double.parse(population);
-      final int coastlineValue = int.parse(coastline);
-      final double latitudeValue = double.parse(latitude);
+      final double value1 = double.parse(input1);
+      final int value2 = _encodeCoastline(_coastlineValue);
+      final double value3 = double.parse(input3);
 
-      final String apiUrl = 'https://linear-regression-summative.onrender.com/predict/';
+      final String apiUrl = 'https://linear-regression-summative.onrender.com/predict/'; // Adjust URL as needed
       final Map<String, dynamic> requestData = {
-        'population': populationValue,
-        'coastline': coastlineValue,
-        'latitude': latitudeValue,
+        'population': value1,
+        'coastline': value2,
+        'latitude': value3,
       };
 
       try {
@@ -94,9 +104,9 @@ class _PredictionPageState extends State<PredictionPage> {
                 ),
                 SizedBox(height: 20),
                 TextFormField(
-                  controller: _populationController,
+                  controller: _input1Controller,
                   decoration: InputDecoration(
-                    labelText: 'Population',
+                    labelText: 'Input Value 1',
                     prefixIcon: Icon(Icons.input),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -116,33 +126,35 @@ class _PredictionPageState extends State<PredictionPage> {
                   },
                 ),
                 SizedBox(height: 20),
-                TextFormField(
-                  controller: _coastlineController,
+                DropdownButtonFormField<String>(
+                  value: _coastlineValue.isEmpty ? null : _coastlineValue,
                   decoration: InputDecoration(
                     labelText: 'Coastline',
-                    prefixIcon: Icon(Icons.input),
+                    prefixIcon: Icon(Icons.map),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                     filled: true,
                     fillColor: Colors.teal.shade50,
                   ),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a value';
-                    }
-                    if (int.tryParse(value) == null) {
-                      return 'Please enter a valid number';
-                    }
-                    return null;
+                  items: ['yes', 'no'].map((value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _coastlineValue = value ?? '';
+                    });
                   },
+                  hint: Text('Select coastline'), // Placeholder text when no option is selected
                 ),
                 SizedBox(height: 20),
                 TextFormField(
-                  controller: _latitudeController,
+                  controller: _input3Controller,
                   decoration: InputDecoration(
-                    labelText: 'Latitude',
+                    labelText: 'Input Value 3',
                     prefixIcon: Icon(Icons.input),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
