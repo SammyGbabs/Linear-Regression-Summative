@@ -23,6 +23,7 @@ This project provides a RESTful API that predicts temperature based on input val
   }
 
 Response Body:
+
 {
 "temperature": <temperature here>  // (float) The predicted temperature
 }
